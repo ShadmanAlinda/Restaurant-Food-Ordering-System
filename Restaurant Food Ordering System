@@ -1,0 +1,153 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+class FoodItem {
+public:
+    FoodItem(const string& name, double price)
+        : name(name), price(price) {}
+
+    string getName() const {
+        return name;
+    }
+
+    double getPrice() const {
+        return price;
+    }
+
+private:
+    string name;
+    double price;
+};
+
+class Restaurant {
+public:
+    Restaurant(const string& name)
+        : name(name) {}
+
+    void addFoodItem(const string& name, double price) {
+        foodItems.push_back(FoodItem(name, price));
+    }
+
+    void showMenu() const {
+        cout << "\n*** Menu of " << name << " ***\n";
+        for (size_t i = 0; i < foodItems.size(); ++i) {
+            cout << i + 1 << ". " << foodItems[i].getName() << " - " << foodItems[i].getPrice() << " Taka" << "\n";
+        }
+    }
+
+    size_t getNumFoodItems() const {
+        return foodItems.size();
+    }
+
+    const FoodItem& getFoodItem(size_t index) const {
+        return foodItems[index];
+    }
+
+private:
+    string name;
+    vector<FoodItem> foodItems;
+};
+
+class Order {
+public:
+    void addItem(const FoodItem& foodItem, int quantity) {
+        items.push_back(make_pair(foodItem, quantity));
+    }
+
+    double getTotalBill() const {
+        double total = 0.0;
+        for (const auto& item : items) {
+            total += item.first.getPrice() * item.second;
+        }
+        return total;
+    }
+
+    void showOrderDetails() const {
+        cout << "\n**Your order is confirmed**\n";
+        cout << "\n*** Order Details ***\n";
+        for (const auto& item : items) {
+            cout << item.second << " x " << item.first.getName() << " - " << item.first.getPrice() << " Taka"
+                      << " each\n";
+        }
+        cout << "\nTotal Bill: " << getTotalBill() << " Taka" <<"\n";
+    }
+
+private:
+    vector<pair<FoodItem, int>> items;
+};
+
+int main() {
+    // Create restaurants and their food items
+    Restaurant yoichi("Yoichi Japanese Food");
+    yoichi.addFoodItem("Sushi", 450);
+    yoichi.addFoodItem("Tempura", 525);
+    yoichi.addFoodItem("Ramen", 380);
+
+    Restaurant lazio("Lazio Burgers");
+    lazio.addFoodItem("Cheeseburger", 180);
+    lazio.addFoodItem("Chicken Cheese Burger", 260);
+    lazio.addFoodItem("Beef Burger", 320);
+
+    Restaurant kashem("Kashem Biriyani House");
+    kashem.addFoodItem("Chicken Biriyani", 180);
+    kashem.addFoodItem("Beef Tehari", 150);
+    kashem.addFoodItem("Kacchi Biriyani", 220);
+
+    // Display the restaurant options
+    cout << "\n               ***Welcome to Restaurant Food Ordering System***\n\n";
+    cout << "Select a restaurant:\n";
+    cout << "1. Yoichi Japanese Food\n";
+    cout << "2. Lazio Burgers\n";
+    cout << "3. Kashem Biriyani House\n";
+
+    int restaurantChoice;
+    cin >> restaurantChoice;
+
+    if (restaurantChoice < 1 || restaurantChoice > 3) {
+        cout << "Invalid choice. Exiting...\n";
+        return 1;
+    }
+
+    // Get the selected restaurant
+    Restaurant* selectedRestaurant;
+    switch (restaurantChoice) {
+        case 1:
+            selectedRestaurant = &yoichi;
+            break;
+        case 2:
+            selectedRestaurant = &lazio;
+            break;
+        case 3:
+            selectedRestaurant = &kashem;
+            break;
+    }
+
+    // Show the menu of the selected restaurant
+    selectedRestaurant->showMenu();
+
+    // Take food item orders
+    Order order;
+    char moreItems = 'y';
+    while (moreItems == 'y' || moreItems == 'Y') {
+        int foodChoice;
+        int quantity;
+        cout << "Enter the number of the food item you want to order: ";
+        cin >> foodChoice;
+        if (foodChoice < 1 || foodChoice > selectedRestaurant->getNumFoodItems()) {
+            cout << "Invalid choice. Please try again.\n";
+            continue;
+        }
+        cout << "Enter the quantity: ";
+        cin >> quantity;
+        order.addItem(selectedRestaurant->getFoodItem(foodChoice - 1), quantity);
+
+        cout << "Add more items? (Y/N): ";
+        cin >> moreItems;
+    }
+
+    // Show the order details and total bill
+    order.showOrderDetails();
+
+    return 0;
+}
